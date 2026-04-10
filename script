@@ -1,0 +1,101 @@
+// 1. FUNGSI TOGGLE SIDEBAR
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("collapsed");
+}
+
+// 2. DATA AWAL (Hanya muncul jika LocalStorage masih kosong)
+const gunungAwal = [
+    {
+        nama: "Gunung Gede",
+        lokasi: "Jawa Barat",
+        tinggi: "2.958 mdpl",
+        deskripsi: "Gunung populer dengan jalur pendakian lengkap dan pemandangan indah."
+    },
+    {
+        nama: "Gunung Pangrango",
+        lokasi: "Jawa Barat",
+        tinggi: "3.019 mdpl",
+        deskripsi: "Gunung tertinggi kedua di Jawa Barat dengan hutan lebat."
+    }
+];
+
+// Inisialisasi LocalStorage jika belum ada data sama sekali
+if (!localStorage.getItem("dataGunung")) {
+    localStorage.setItem("dataGunung", JSON.stringify(gunungAwal));
+}
+
+// 3. FUNGSI MENAMPILKAN DATA (LOAD DATA)
+function loadGunung() {
+    const container = document.getElementById("cardContainer");
+    if(!container) return; // Mencegah error jika id tidak ditemukan
+    
+    container.innerHTML = ""; // Bersihkan tampilan sebelum muat ulang
+    
+    const data = JSON.parse(localStorage.getItem("dataGunung")) || [];
+    
+    data.forEach((g, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <h3>${g.nama}</h3>
+            <p><b>Lokasi:</b> ${g.lokasi}</p>
+            <p><b>Tinggi:</b> ${g.tinggi}</p>
+            <p>${g.deskripsi}</p>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="alert('Detail ${g.nama}')" style="flex: 1;">Detail</button>
+                <button onclick="hapusGunung(${index})" style="background: #b00020; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Hapus</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// 4. FUNGSI MODAL (Buka/Tutup Form Tambah)
+function openModal() { 
+    document.getElementById("modalGunung").style.display = "block"; 
+}
+function closeModal() { 
+    document.getElementById("modalGunung").style.display = "none"; 
+}
+
+// 5. FUNGSI SIMPAN DATA BARU (TAMBAH)
+function simpanGunung() {
+    const nama = document.getElementById("newNama").value;
+    const lokasi = document.getElementById("newLokasi").value;
+    const tinggi = document.getElementById("newTinggi").value;
+    const deskripsi = document.getElementById("newDeskripsi").value;
+
+    if (nama && lokasi && tinggi) {
+        const dataLama = JSON.parse(localStorage.getItem("dataGunung")) || [];
+        const dataBaru = { nama, lokasi, tinggi, deskripsi };
+        
+        dataLama.push(dataBaru);
+        localStorage.setItem("dataGunung", JSON.stringify(dataLama));
+        
+        alert("Data Berhasil Ditambahkan!");
+        closeModal();
+        loadGunung(); // Refresh tampilan kartu secara otomatis
+        
+        // Reset isi form
+        document.getElementById("newNama").value = "";
+        document.getElementById("newLokasi").value = "";
+        document.getElementById("newTinggi").value = "";
+        document.getElementById("newDeskripsi").value = "";
+    } else {
+        alert("Mohon isi semua data!");
+    }
+}
+
+// 6. FUNGSI HAPUS DATA
+function hapusGunung(index) {
+    if (confirm("Apakah Anda yakin ingin menghapus data gunung ini?")) {
+        let dataLama = JSON.parse(localStorage.getItem("dataGunung")) || [];
+        dataLama.splice(index, 1); // Hapus data berdasarkan urutan
+        localStorage.setItem("dataGunung", JSON.stringify(dataLama));
+        loadGunung(); // Refresh tampilan kartu secara otomatis
+    }
+}
+
+// 7. JALANKAN LOAD DATA SAAT HALAMAN DIBUKA
+loadGunung();
